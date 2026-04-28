@@ -120,7 +120,7 @@ export function DetalhesOS() {
               <tbody className="divide-y border-gray-200">
                 {os.pecas && os.pecas.map((peca, idx) => (
                   <tr key={idx}>
-                    <td className="py-3 text-sm font-medium text-gray-800">{peca.nome}</td>
+                    <td className="py-3 text-sm font-medium text-gray-800">{peca.nome.replace('(Avulsa)', '').trim()}</td>
                     <td className="py-3 text-sm text-gray-600 text-center">{peca.qtd}</td>
                     <td className="py-3 text-sm font-bold text-gray-800 text-right">{formatCurrency(peca.precoVenda * peca.qtd)}</td>
                   </tr>
