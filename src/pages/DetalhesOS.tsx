@@ -82,7 +82,7 @@ export function DetalhesOS() {
           {/* Header do Recibo */}
           <div className="flex justify-between items-start border-b-2 border-gray-200 pb-4 mb-6">
             <div>
-              <h1 className="text-2xl font-black text-gray-800 tracking-tight uppercase">Gestão Mecânica Oliveira</h1>
+              <h1 className="text-2xl font-black text-gray-800 tracking-tight uppercase">Mecânica Oliveira</h1>
               <p className="text-sm text-gray-500 font-medium">Serviços Automotivos de Qualidade</p>
               <p className="text-xs text-gray-400 mt-1">Rua das Oficinas, 123 - Centro | (31) 99999-9999</p>
             </div>
