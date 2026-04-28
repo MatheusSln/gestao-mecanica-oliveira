@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { useMockData } from '../lib/mockData';
-import { DollarSign, Wallet, FileText, Plus } from 'lucide-react';
+import { DollarSign, Wallet, TrendingUp, Plus } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Link } from 'react-router-dom';
 
@@ -9,30 +9,45 @@ export function Dashboard() {
   const { getFaturamento, getComissoes, getOrdensServico } = useMockData();
   const formatCurrency = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
 
+  const faturado = getFaturamento();
+  const comissoes = getComissoes();
+  const liquido = faturado - comissoes;
+
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Resumo da Semana</h2>
       
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="bg-primary text-primary-foreground border-none">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium opacity-90 flex items-center">
-              <DollarSign className="w-4 h-4 mr-1" /> Faturado
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="col-span-2 bg-gray-900 text-white border-none shadow-md">
+          <CardHeader className="pb-1 pt-4">
+            <CardTitle className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center">
+              <DollarSign className="w-4 h-4 mr-1 text-gray-400" /> Faturado
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">{formatCurrency(getFaturamento())}</p>
+          <CardContent className="pb-4">
+            <p className="text-3xl font-black">{formatCurrency(faturado)}</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-xs font-medium text-muted-foreground flex items-center">
-              <Wallet className="w-4 h-4 mr-1" /> Comissões
+        <Card className="border-red-100 bg-red-50/30">
+          <CardHeader className="pb-1 pt-3">
+            <CardTitle className="text-[10px] font-bold text-red-400 uppercase tracking-wider flex items-center">
+              <Wallet className="w-3 h-3 mr-1" /> Comissões
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-xl font-bold text-red-500">{formatCurrency(getComissoes())}</p>
+          <CardContent className="pb-3">
+            <p className="text-lg font-black text-red-600">-{formatCurrency(comissoes)}</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-green-200 bg-green-50 shadow-sm">
+          <CardHeader className="pb-1 pt-3">
+            <CardTitle className="text-[10px] font-bold text-green-700 uppercase tracking-wider flex items-center">
+              <TrendingUp className="w-3 h-3 mr-1" /> Valor Líquido
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pb-3">
+            <p className="text-lg font-black text-green-700">{formatCurrency(liquido)}</p>
           </CardContent>
         </Card>
       </div>
