@@ -1,25 +1,22 @@
 import { useState, useEffect } from 'react';
 import type { Peca } from './types';
 import { isFirebaseConfigured } from './firebase';
-import { subscribeToEstoque, adicionarPeca, atualizarQuantidade } from './firestoreService';
+import { subscribeToEstoque, adicionarPeca, atualizarQuantidade, removerPeca } from './firestoreService';
 import { useMockData } from './mockData';
 
 export function useEstoque() {
   const { getEstoque } = useMockData();
   const [pecas, setPecas] = useState<Peca[]>([]);
   const [loading, setLoading] = useState(true);
-  const [usingFirebase, setUsingFirebase] = useState(false);
+  const [usingFirebase] = useState(isFirebaseConfigured());
 
   useEffect(() => {
     if (isFirebaseConfigured()) {
-      setUsingFirebase(true);
-      const unsubscribe = subscribeToEstoque((data) => {
+      return subscribeToEstoque((data) => {
         setPecas(data);
         setLoading(false);
       });
-      return unsubscribe;
     } else {
-      // Fallback: mock data (app funciona sem Firebase configurado)
       setPecas(getEstoque() as Peca[]);
       setLoading(false);
     }
@@ -38,12 +35,18 @@ export function useEstoque() {
       await atualizarQuantidade(id, delta);
     } else {
       setPecas((prev) =>
-        prev.map((p) =>
-          p.id === id ? { ...p, quantidade: Math.max(0, p.quantidade + delta) } : p
-        )
+        prev.map((p) => (p.id === id ? { ...p, quantidade: Math.max(0, p.quantidade + delta) } : p))
       );
     }
   };
 
-  return { pecas, loading, usingFirebase, addPeca, updateQty };
+  const removePeca_ = async (id: string): Promise<void> => {
+    if (usingFirebase) {
+      await removerPeca(id);
+    } else {
+      setPecas((prev) => prev.filter((p) => p.id !== id));
+    }
+  };
+
+  return { pecas, loading, usingFirebase, addPeca, updateQty, removePeca: removePeca_ };
 }

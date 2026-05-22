@@ -16,14 +16,8 @@ type Etapa = 'escolha' | 'scanner' | 'form';
 const CATEGORIAS = ['Lubrificantes', 'Filtros', 'Freios', 'Motor', 'Suspensão', 'Elétrica', 'Outros'];
 
 const FORM_VAZIO = {
-  nome: '',
-  marca: '',
-  codigo: '',
-  categoria: '',
-  compatibilidade: '',
-  quantidade: '1',
-  precoVenda: '',
-  precoCompra: '',
+  nome: '', marca: '', codigo: '', categoria: '',
+  compatibilidade: '', quantidade: '1', precoVenda: '', precoCompra: '',
 };
 
 export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalProps) {
@@ -34,14 +28,12 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
   const [salvoComSucesso, setSalvoComSucesso] = useState(false);
   const [erroSalvar, setErroSalvar] = useState('');
 
-  const setField = (field: keyof typeof FORM_VAZIO, value: string) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const setField = (f: keyof typeof FORM_VAZIO, v: string) => setForm((p) => ({ ...p, [f]: v }));
 
   const handleScan = async (codigo: string) => {
     setEtapa('form');
     setField('codigo', codigo);
     setBuscando(true);
-
     const produto = await buscarProdutoPorCodigo(codigo);
     if (produto) {
       setForm((prev) => ({
@@ -67,13 +59,11 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
         compatibilidade: form.compatibilidade.trim() || 'Universal',
         quantidade: parseInt(form.quantidade) || 0,
         precoVenda: parseFloat(form.precoVenda.replace(',', '.')) || 0,
-        precoCompra: form.precoCompra
-          ? parseFloat(form.precoCompra.replace(',', '.'))
-          : undefined,
+        precoCompra: form.precoCompra ? parseFloat(form.precoCompra.replace(',', '.')) : undefined,
       });
       setSalvoComSucesso(true);
-      setTimeout(onFechar, 1000);
-    } catch (e) {
+      setTimeout(onFechar, 900);
+    } catch {
       setErroSalvar('Erro ao salvar. Tente novamente.');
     } finally {
       setSalvando(false);
@@ -81,21 +71,12 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
   };
 
   if (etapa === 'scanner') {
-    return (
-      <BarcodeScanner
-        onScan={handleScan}
-        onCancel={() => {
-          setEtapa('form');
-          setField('codigo', '');
-        }}
-      />
-    );
+    return <BarcodeScanner onScan={handleScan} onCancel={() => { setEtapa('form'); setField('codigo', ''); }} />;
   }
 
   return (
     <div className="fixed inset-0 z-40 bg-black/60 flex items-end sm:items-center justify-center">
       <div className="bg-white w-full max-w-lg rounded-t-2xl sm:rounded-2xl max-h-[92vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-100 sticky top-0 bg-white rounded-t-2xl">
           <div className="flex items-center gap-2">
             <PackagePlus className="w-5 h-5 text-gray-700" />
@@ -106,7 +87,6 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
           </button>
         </div>
 
-        {/* Etapa escolha */}
         {etapa === 'escolha' && (
           <div className="p-6 space-y-4">
             <p className="text-sm text-gray-500 text-center">Como deseja adicionar a peça?</p>
@@ -117,9 +97,7 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
               <ScanBarcode className="w-8 h-8 flex-shrink-0" />
               <div className="text-left">
                 <p className="font-bold text-sm">Escanear com a câmera</p>
-                <p className="text-xs text-white/70 mt-0.5">
-                  Aponte para o QR code ou código de barras da embalagem
-                </p>
+                <p className="text-xs text-white/70 mt-0.5">Aponte para o código de barras ou QR code</p>
               </div>
             </button>
             <button
@@ -135,7 +113,6 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
           </div>
         )}
 
-        {/* Etapa form */}
         {etapa === 'form' && (
           <div className="p-4 space-y-4">
             {salvoComSucesso && (
@@ -144,7 +121,6 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
                 <span className="text-sm font-medium">Peça salva com sucesso!</span>
               </div>
             )}
-
             {buscando && (
               <div className="flex items-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 rounded-lg p-3">
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -152,145 +128,68 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
               </div>
             )}
 
-            {/* Código (do scanner ou manual) */}
             <div>
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                Código / SKU / EAN
-              </label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Código / SKU / EAN</label>
               <div className="flex gap-2">
-                <Input
-                  placeholder="Ex: MO-5W30 ou 7891234567890"
-                  value={form.codigo}
-                  onChange={(e) => setField('codigo', e.target.value)}
-                  className="flex-1"
-                />
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setEtapa('scanner')}
-                  title="Escanear com câmera"
-                  className="flex-shrink-0"
-                >
+                <Input placeholder="Ex: MO-5W30 ou 7891234567890" value={form.codigo} onChange={(e) => setField('codigo', e.target.value)} className="flex-1" />
+                <Button variant="outline" size="icon" onClick={() => setEtapa('scanner')} title="Escanear" className="flex-shrink-0">
                   <ScanBarcode className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* Nome */}
             <div>
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                Nome da Peça *
-              </label>
-              <Input
-                placeholder="Ex: Óleo 5W30 Sintético"
-                value={form.nome}
-                onChange={(e) => setField('nome', e.target.value)}
-              />
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Nome da Peça *</label>
+              <Input placeholder="Ex: Óleo 5W30 Sintético" value={form.nome} onChange={(e) => setField('nome', e.target.value)} />
             </div>
 
-            {/* Marca */}
             <div>
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                Marca
-              </label>
-              <Input
-                placeholder="Ex: Mobil, Castrol, Cobreq..."
-                value={form.marca}
-                onChange={(e) => setField('marca', e.target.value)}
-              />
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Marca</label>
+              <Input placeholder="Ex: Mobil, Castrol, Cobreq..." value={form.marca} onChange={(e) => setField('marca', e.target.value)} />
             </div>
 
-            {/* Categoria */}
             <div>
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                Categoria
-              </label>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Categoria</label>
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-900"
                 value={form.categoria}
                 onChange={(e) => setField('categoria', e.target.value)}
               >
                 <option value="">Selecionar...</option>
-                {CATEGORIAS.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
+                {CATEGORIAS.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
-            {/* Compatibilidade */}
             <div>
-              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                Compatibilidade / Aplicação
-              </label>
-              <Input
-                placeholder="Ex: VW Gol G5, Universal..."
-                value={form.compatibilidade}
-                onChange={(e) => setField('compatibilidade', e.target.value)}
-              />
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Compatibilidade</label>
+              <Input placeholder="Ex: VW Gol G5, Universal..." value={form.compatibilidade} onChange={(e) => setField('compatibilidade', e.target.value)} />
             </div>
 
-            {/* Quantidade e preços */}
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                  Qtd.
-                </label>
-                <Input
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={form.quantidade}
-                  onChange={(e) => setField('quantidade', e.target.value)}
-                />
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Qtd.</label>
+                <Input type="number" min="0" placeholder="0" value={form.quantidade} onChange={(e) => setField('quantidade', e.target.value)} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                  Preço Compra
-                </label>
-                <Input
-                  type="number"
-                  placeholder="0,00"
-                  value={form.precoCompra}
-                  onChange={(e) => setField('precoCompra', e.target.value)}
-                />
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Preço Compra</label>
+                <Input type="number" placeholder="0,00" value={form.precoCompra} onChange={(e) => setField('precoCompra', e.target.value)} />
               </div>
               <div>
-                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">
-                  Preço Venda *
-                </label>
-                <Input
-                  type="number"
-                  placeholder="0,00"
-                  value={form.precoVenda}
-                  onChange={(e) => setField('precoVenda', e.target.value)}
-                />
+                <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Preço Venda *</label>
+                <Input type="number" placeholder="0,00" value={form.precoVenda} onChange={(e) => setField('precoVenda', e.target.value)} />
               </div>
             </div>
 
-            {erroSalvar && (
-              <p className="text-sm text-red-500 font-medium">{erroSalvar}</p>
-            )}
+            {erroSalvar && <p className="text-sm text-red-500 font-medium">{erroSalvar}</p>}
 
             <div className="flex gap-3 pt-2 pb-2">
-              <Button
-                variant="outline"
-                className="flex-1 h-12"
-                onClick={() => setEtapa('escolha')}
-              >
-                Voltar
-              </Button>
+              <Button variant="outline" className="flex-1 h-12" onClick={() => setEtapa('escolha')}>Voltar</Button>
               <Button
                 className="flex-1 h-12 bg-gray-900 hover:bg-gray-800 text-white font-bold"
                 onClick={handleSalvar}
                 disabled={salvando || !form.nome || !form.precoVenda || salvoComSucesso}
               >
-                {salvando ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  'Salvar Peça'
-                )}
+                {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar Peça'}
               </Button>
             </div>
           </div>

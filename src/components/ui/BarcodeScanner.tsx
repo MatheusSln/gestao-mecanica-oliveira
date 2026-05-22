@@ -15,16 +15,13 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
   const stopped = useRef(false);
 
   useEffect(() => {
-    const scannerId = 'qr-scanner-container';
     let scanner: import('html5-qrcode').Html5Qrcode | null = null;
 
-    // Carrega a lib apenas quando o scanner abre (lazy)
     import('html5-qrcode')
       .then(({ Html5Qrcode }) => {
         if (stopped.current) return;
-        scanner = new Html5Qrcode(scannerId);
+        scanner = new Html5Qrcode('qr-scanner-container');
         scannerRef.current = scanner;
-
         return scanner.start(
           { facingMode: 'environment' },
           { fps: 10, qrbox: { width: 260, height: 180 } },
@@ -36,18 +33,16 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
           () => {}
         );
       })
-      .then(() => {
-        if (!stopped.current) setStatus('ativo');
-      })
+      .then(() => { if (!stopped.current) setStatus('ativo'); })
       .catch((err: Error) => {
         if (stopped.current) return;
         const msg = err?.message ?? '';
         if (msg.includes('permission') || msg.includes('NotAllowed')) {
-          setErroMsg('Permissão de câmera negada. Libere o acesso nas configurações do navegador.');
+          setErroMsg('Permissão de câmera negada. Libere nas configurações do navegador.');
         } else if (msg.includes('NotFound') || msg.includes('no camera')) {
           setErroMsg('Nenhuma câmera encontrada neste dispositivo.');
         } else {
-          setErroMsg('Não foi possível iniciar a câmera. Tente digitar o código manualmente.');
+          setErroMsg('Não foi possível iniciar a câmera.');
         }
         setStatus('erro');
       });
@@ -60,7 +55,6 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col">
-      {/* Header */}
       <div className="flex items-center justify-between p-4 text-white">
         <div className="flex items-center gap-2">
           <Camera className="w-5 h-5" />
@@ -71,7 +65,6 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
         </button>
       </div>
 
-      {/* Camera view */}
       <div className="flex-1 flex flex-col items-center justify-center px-4">
         {status === 'iniciando' && (
           <div className="flex flex-col items-center gap-3 text-white mb-6">
@@ -79,7 +72,6 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
             <p className="text-sm">Iniciando câmera...</p>
           </div>
         )}
-
         {status === 'erro' && (
           <div className="flex flex-col items-center gap-4 text-center mb-6">
             <p className="text-red-400 text-sm font-medium px-4">{erroMsg}</p>
@@ -88,10 +80,7 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
             </Button>
           </div>
         )}
-
-        {/* html5-qrcode injeta o preview de câmera aqui */}
         <div id="qr-scanner-container" className="w-full max-w-sm rounded-xl overflow-hidden" />
-
         {status === 'ativo' && (
           <p className="text-white/70 text-xs text-center mt-4 px-8">
             Aponte a câmera para o código de barras ou QR code da embalagem
@@ -99,7 +88,6 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
         )}
       </div>
 
-      {/* Footer */}
       <div className="p-4 pb-8">
         <Button
           variant="outline"

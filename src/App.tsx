@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { MobileLayout } from './components/layout/MobileLayout';
 import { Dashboard } from './pages/Dashboard';
@@ -7,8 +7,13 @@ import { DetalhesOS } from './pages/DetalhesOS';
 import { Estoque } from './pages/Estoque';
 import { Equipe } from './pages/Equipe';
 import { NovaOS } from './pages/NovaOS';
+import { initializeDataIfEmpty } from './lib/firestoreService';
 
 function App() {
+  useEffect(() => {
+    initializeDataIfEmpty().catch(console.error);
+  }, []);
+
   return (
     <Router>
       <Routes>

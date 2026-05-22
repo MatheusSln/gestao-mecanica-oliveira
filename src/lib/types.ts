@@ -1,3 +1,9 @@
+export interface PecaOS {
+  nome: string;
+  qtd: number;
+  precoVenda: number;
+}
+
 export interface Peca {
   id: string;
   nome: string;
@@ -16,12 +22,15 @@ export interface OrdemServico {
   placa: string;
   cliente: string;
   telefone: string;
+  mecanico: string;
+  mecanicoId: string;
+  pecas: PecaOS[];
+  maoObra: number;
   valor: number;
   status: 'Em Aberto' | 'Fechada';
-  mecanico: string;
-  pecas: { nome: string; qtd: number; precoVenda: number }[];
-  maoObra: number;
   data: string;
+  assinatura?: string;
+  criadoEm?: unknown;
 }
 
 export interface Mecanico {
@@ -35,5 +44,4 @@ export interface ProductLookupResult {
   nome: string;
   marca: string;
   categoria?: string;
-  descricao?: string;
 }
