@@ -1,15 +1,33 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { useEquipe } from '../lib/useEquipe';
 import { NovoMecanicoModal } from '../components/ui/NovoMecanicoModal';
-import { UserPlus, UserCircle, CarFront, Loader2, Trash2 } from 'lucide-react';
+import { descreveComissao } from '../lib/comissao';
+import type { ComissaoTipo } from '../lib/types';
+import { UserPlus, UserCircle, CarFront, Loader2, Trash2, Pencil, Check } from 'lucide-react';
 
 export function Equipe() {
-  const { equipe, loading, addMecanico, zerarComissao, removeMecanico } = useEquipe();
+  const { equipe, loading, addMecanico, zerarComissao, removeMecanico, updateComissao } = useEquipe();
   const [mostrarModal, setMostrarModal] = useState(false);
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [editTipo, setEditTipo] = useState<ComissaoTipo>('percentual');
+  const [editValor, setEditValor] = useState('');
+
   const fmt = (val: number) => `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   const totalComissoes = equipe.reduce((acc, m) => acc + m.comissaoSemana, 0);
+
+  const abrirEdicao = (id: string, tipo: ComissaoTipo | undefined, valor: number | undefined) => {
+    setEditandoId(id);
+    setEditTipo(tipo ?? 'percentual');
+    setEditValor(valor != null ? String(valor) : '');
+  };
+
+  const salvarEdicao = async (id: string) => {
+    await updateComissao(id, editTipo, parseFloat(editValor.replace(',', '.')) || 0);
+    setEditandoId(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -21,7 +39,7 @@ export function Equipe() {
       </div>
 
       <div className="bg-primary/10 border border-primary/20 rounded-xl p-4 mt-2">
-        <h3 className="text-sm font-bold text-primary">Total a Pagar (Semana)</h3>
+        <h3 className="text-sm font-bold text-primary">Total a Pagar (acumulado)</h3>
         <p className="text-2xl font-bold mt-1 text-primary">{fmt(totalComissoes)}</p>
       </div>
 
@@ -56,16 +74,47 @@ export function Equipe() {
                 </Button>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center">
+              {/* Regra de comissão */}
+              {editandoId === mecanico.id ? (
+                <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg p-3 space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button type="button" onClick={() => setEditTipo('percentual')}
+                      className={`h-9 rounded-md text-xs font-bold border transition-colors ${editTipo === 'percentual' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-300'}`}>
+                      % da mão de obra
+                    </button>
+                    <button type="button" onClick={() => setEditTipo('fixo')}
+                      className={`h-9 rounded-md text-xs font-bold border transition-colors ${editTipo === 'fixo' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-300'}`}>
+                      Valor fixo/carro
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Input type="number" autoFocus placeholder={editTipo === 'percentual' ? '% (ex: 40)' : 'R$ por carro'}
+                      value={editValor} onChange={(e) => setEditValor(e.target.value)} className="flex-1" />
+                    <Button className="h-10 bg-green-600 hover:bg-green-700 text-white gap-1" onClick={() => salvarEdicao(mecanico.id)}>
+                      <Check className="w-4 h-4" /> Salvar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => abrirEdicao(mecanico.id, mecanico.comissaoTipo, mecanico.comissaoValor)}
+                  className="mt-3 w-full flex items-center justify-between text-xs bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 hover:border-gray-300"
+                >
+                  <span className="text-gray-500">Comissão: <span className="font-bold text-gray-700">{descreveComissao(mecanico)}</span></span>
+                  <Pencil className="w-3 h-3 text-gray-400" />
+                </button>
+              )}
+
+              <div className="mt-3 pt-3 border-t border-gray-100 flex justify-between items-center">
                 <span className="text-sm font-semibold text-gray-600">Comissão acumulada:</span>
                 <span className="text-lg font-bold text-red-500">{fmt(mecanico.comissaoSemana)}</span>
               </div>
 
               <Button
                 className="w-full mt-3 bg-red-500 hover:bg-red-600 text-white gap-2"
-                onClick={() => { if (confirm(`Zerar semana de ${mecanico.nome}? Esta ação não pode ser desfeita.`)) zerarComissao(mecanico.id); }}
+                onClick={() => { if (confirm(`Zerar repasse de ${mecanico.nome}? Esta ação não pode ser desfeita.`)) zerarComissao(mecanico.id); }}
               >
-                Zerar Semana e Pagar — {fmt(mecanico.comissaoSemana)}
+                Zerar e Pagar — {fmt(mecanico.comissaoSemana)}
               </Button>
             </CardContent>
           </Card>

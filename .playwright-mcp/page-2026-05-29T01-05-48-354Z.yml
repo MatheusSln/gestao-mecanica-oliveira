@@ -1,0 +1,36 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Gestão Mecânica Oliveira" [level=1] [ref=e5]
+  - main [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - heading "Estoque de Peças" [level=2] [ref=e10]
+          - generic [ref=e11]:
+            - img [ref=e12]
+            - text: Sincronizado na nuvem
+        - button [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - img [ref=e20]
+      - generic [ref=e21]:
+        - img [ref=e22]
+        - textbox "Buscar por nome, código ou carro..." [ref=e25]
+      - button "Todas" [ref=e27] [cursor=pointer]
+      - img [ref=e29]
+  - navigation [ref=e31]:
+    - link "Início" [ref=e32] [cursor=pointer]:
+      - /url: /
+      - img [ref=e33]
+      - generic [ref=e36]: Início
+    - link "Recibos (OS)" [ref=e37] [cursor=pointer]:
+      - /url: /recibos
+      - img [ref=e38]
+      - generic [ref=e40]: Recibos (OS)
+    - link "Estoque" [ref=e41] [cursor=pointer]:
+      - /url: /estoque
+      - img [ref=e42]
+      - generic [ref=e46]: Estoque
+    - link "Equipe" [ref=e47] [cursor=pointer]:
+      - /url: /equipe
+      - img [ref=e48]
+      - generic [ref=e53]: Equipe

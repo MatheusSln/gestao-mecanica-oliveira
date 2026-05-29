@@ -67,8 +67,8 @@ export const useMockData = () => {
   ];
 
   const getEquipe = () => [
-    { id: 'm1', nome: 'Marcos (Mecânico Sênior)', comissaoSemana: 850.00, carrosAtendidos: 4 },
-    { id: 'm2', nome: 'Pedro (Auxiliar)', comissaoSemana: 400.00, carrosAtendidos: 2 },
+    { id: 'm1', nome: 'Marcos (Mecânico Sênior)', comissaoSemana: 850.00, carrosAtendidos: 4, comissaoTipo: 'percentual', comissaoValor: 40 },
+    { id: 'm2', nome: 'Pedro (Auxiliar)', comissaoSemana: 400.00, carrosAtendidos: 2, comissaoTipo: 'percentual', comissaoValor: 25 },
   ];
 
   return { getFaturamento, getComissoes, getOrdensServico, getOrdemById, getEstoque, getEquipe };

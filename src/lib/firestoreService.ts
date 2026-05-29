@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Peca, OrdemServico, Mecanico, PecaOS } from './types';
+import type { Peca, OrdemServico, Mecanico, PecaOS, ComissaoTipo } from './types';
 
 // ─── ESTOQUE ─────────────────────────────────────────────────────────────────
 
@@ -55,18 +55,24 @@ export async function adicionarOS(
   os: Omit<OrdemServico, 'id' | 'criadoEm'>
 ): Promise<string> {
   if (!db) throw new Error('Firebase não configurado');
-  const ref = await addDoc(collection(db, 'ordensServico'), {
-    ...os,
-    criadoEm: serverTimestamp(),
-  });
+  const batch = writeBatch(db);
+  const osRef = doc(collection(db, 'ordensServico'));
+  batch.set(osRef, { ...os, criadoEm: serverTimestamp() });
   // Atualiza a comissão e contador do mecânico
   if (os.mecanicoId) {
-    await updateDoc(doc(db, 'equipe', os.mecanicoId), {
-      comissaoSemana: increment(os.maoObra),
+    batch.update(doc(db, 'equipe', os.mecanicoId), {
+      comissaoSemana: increment(os.comissao ?? 0),
       carrosAtendidos: increment(1),
     });
   }
-  return ref.id;
+  // Baixa do estoque para peças vinculadas a um item cadastrado
+  for (const peca of os.pecas) {
+    if (peca.pecaId) {
+      batch.update(doc(db, 'estoque', peca.pecaId), { quantidade: increment(-peca.qtd) });
+    }
+  }
+  await batch.commit();
+  return osRef.id;
 }
 
 export async function fecharOS(id: string, assinatura?: string): Promise<void> {
@@ -81,9 +87,17 @@ export async function reabrirOS(id: string): Promise<void> {
   await updateDoc(doc(db, 'ordensServico', id), { status: 'Em Aberto' });
 }
 
-export async function excluirOS(id: string): Promise<void> {
+export async function excluirOS(id: string, pecas?: PecaOS[]): Promise<void> {
   if (!db) throw new Error('Firebase não configurado');
-  await deleteDoc(doc(db, 'ordensServico', id));
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'ordensServico', id));
+  // Devolve ao estoque as peças que tinham baixado
+  for (const peca of pecas ?? []) {
+    if (peca.pecaId) {
+      batch.update(doc(db, 'estoque', peca.pecaId), { quantidade: increment(peca.qtd) });
+    }
+  }
+  await batch.commit();
 }
 
 // ─── EQUIPE ──────────────────────────────────────────────────────────────────
@@ -96,15 +110,30 @@ export function subscribeToEquipe(callback: (equipe: Mecanico[]) => void): () =>
   );
 }
 
-export async function adicionarMecanico(nome: string): Promise<string> {
+export async function adicionarMecanico(
+  nome: string,
+  comissaoTipo: ComissaoTipo = 'percentual',
+  comissaoValor = 0
+): Promise<string> {
   if (!db) throw new Error('Firebase não configurado');
   const ref = await addDoc(collection(db, 'equipe'), {
     nome,
     comissaoSemana: 0,
     carrosAtendidos: 0,
+    comissaoTipo,
+    comissaoValor,
     criadoEm: serverTimestamp(),
   });
   return ref.id;
+}
+
+export async function atualizarComissaoMecanico(
+  id: string,
+  comissaoTipo: ComissaoTipo,
+  comissaoValor: number
+): Promise<void> {
+  if (!db) throw new Error('Firebase não configurado');
+  await updateDoc(doc(db, 'equipe', id), { comissaoTipo, comissaoValor });
 }
 
 export async function zerarComissaoMecanico(id: string): Promise<void> {
@@ -119,7 +148,16 @@ export async function excluirMecanico(id: string): Promise<void> {
 
 // ─── SEED ────────────────────────────────────────────────────────────────────
 
-export async function initializeDataIfEmpty(): Promise<void> {
+let seedRun: Promise<void> | null = null;
+
+export function initializeDataIfEmpty(): Promise<void> {
+  if (!db) return Promise.resolve();
+  // Idempotente: StrictMode (dev) dispara o efeito 2x; sem isto o seed grava duplicado.
+  if (!seedRun) seedRun = _initializeDataIfEmpty();
+  return seedRun;
+}
+
+async function _initializeDataIfEmpty(): Promise<void> {
   if (!db) return;
 
   const [estoqueSnap, osSnap, equipeSnap] = await Promise.all([
@@ -151,8 +189,8 @@ export async function initializeDataIfEmpty(): Promise<void> {
   if (equipeSnap.empty) {
     hasData = true;
     const mecanicos = [
-      { nome: 'Marcos (Mecânico Sênior)', comissaoSemana: 850.00, carrosAtendidos: 4 },
-      { nome: 'Pedro (Auxiliar)', comissaoSemana: 400.00, carrosAtendidos: 2 },
+      { nome: 'Marcos (Mecânico Sênior)', comissaoSemana: 850.00, carrosAtendidos: 4, comissaoTipo: 'percentual', comissaoValor: 40 },
+      { nome: 'Pedro (Auxiliar)', comissaoSemana: 400.00, carrosAtendidos: 2, comissaoTipo: 'percentual', comissaoValor: 25 },
     ];
     mecanicos.forEach((m) => {
       const ref = doc(collection(db!, 'equipe'));

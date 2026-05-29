@@ -2,6 +2,8 @@ export interface PecaOS {
   nome: string;
   qtd: number;
   precoVenda: number;
+  pecaId?: string;
+  precoCompra?: number;
 }
 
 export interface Peca {
@@ -30,14 +32,19 @@ export interface OrdemServico {
   status: 'Em Aberto' | 'Fechada';
   data: string;
   assinatura?: string;
+  comissao?: number;
   criadoEm?: unknown;
 }
+
+export type ComissaoTipo = 'percentual' | 'fixo';
 
 export interface Mecanico {
   id: string;
   nome: string;
   comissaoSemana: number;
   carrosAtendidos: number;
+  comissaoTipo?: ComissaoTipo;
+  comissaoValor?: number;
 }
 
 export interface ProductLookupResult {

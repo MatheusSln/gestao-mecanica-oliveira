@@ -1,0 +1,458 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Gestão Mecânica Oliveira" [level=1] [ref=e5]
+  - main [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - heading "Estoque de Peças" [level=2] [ref=e10]
+          - generic [ref=e11]:
+            - img [ref=e12]
+            - text: Sincronizado na nuvem
+        - button [ref=e14] [cursor=pointer]:
+          - img [ref=e15]
+          - img [ref=e20]
+      - generic [ref=e21]:
+        - img [ref=e22]
+        - textbox "Buscar por nome, código ou carro..." [ref=e25]
+      - generic [ref=e26]:
+        - button "Todas" [ref=e27] [cursor=pointer]
+        - button "Suspensão" [ref=e54] [cursor=pointer]
+        - button "Motor" [ref=e55] [cursor=pointer]
+        - button "Filtros" [ref=e56] [cursor=pointer]
+        - button "Freios" [ref=e57] [cursor=pointer]
+        - button "Lubrificantes" [ref=e58] [cursor=pointer]
+      - generic [ref=e59]:
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]:
+                - generic [ref=e65]: Suspensão
+                - generic [ref=e66]: "SKU: SP041"
+              - paragraph [ref=e67]: Amortecedor Dianteiro
+            - paragraph [ref=e69]: R$ 350,00
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - text: "Marca:"
+            - generic [ref=e74]: Monroe
+          - generic [ref=e75]:
+            - img [ref=e76]
+            - text: "Aplicação:"
+            - generic [ref=e79]: GM Onix 13-19
+          - generic [ref=e80]:
+            - generic [ref=e82]:
+              - img [ref=e83]
+              - text: Sem Estoque
+            - generic [ref=e85]:
+              - button "-" [disabled]
+              - generic [ref=e86]: "0"
+              - button "+" [ref=e87] [cursor=pointer]
+              - button [ref=e88] [cursor=pointer]:
+                - img [ref=e89]
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]:
+              - generic [ref=e96]:
+                - generic [ref=e97]: Suspensão
+                - generic [ref=e98]: "SKU: SP041"
+              - paragraph [ref=e99]: Amortecedor Dianteiro
+            - paragraph [ref=e101]: R$ 350,00
+          - generic [ref=e102]:
+            - img [ref=e103]
+            - text: "Marca:"
+            - generic [ref=e106]: Monroe
+          - generic [ref=e107]:
+            - img [ref=e108]
+            - text: "Aplicação:"
+            - generic [ref=e111]: GM Onix 13-19
+          - generic [ref=e112]:
+            - generic [ref=e114]:
+              - img [ref=e115]
+              - text: Sem Estoque
+            - generic [ref=e117]:
+              - button "-" [disabled]
+              - generic [ref=e118]: "0"
+              - button "+" [ref=e119] [cursor=pointer]
+              - button [ref=e120] [cursor=pointer]:
+                - img [ref=e121]
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - generic [ref=e129]: Motor
+                - generic [ref=e130]: "SKU: 135SP254H"
+              - paragraph [ref=e131]: Correia Dentada
+            - paragraph [ref=e133]: R$ 145,00
+          - generic [ref=e134]:
+            - img [ref=e135]
+            - text: "Marca:"
+            - generic [ref=e138]: Dayco
+          - generic [ref=e139]:
+            - img [ref=e140]
+            - text: "Aplicação:"
+            - generic [ref=e143]: VW Motor EA111
+          - generic [ref=e144]:
+            - generic [ref=e146]:
+              - img [ref=e147]
+              - text: Baixo (3)
+            - generic [ref=e149]:
+              - button "-" [ref=e150] [cursor=pointer]
+              - generic [ref=e151]: "3"
+              - button "+" [ref=e152] [cursor=pointer]
+              - button [ref=e153] [cursor=pointer]:
+                - img [ref=e154]
+        - generic [ref=e158]:
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e161]:
+                - generic [ref=e162]: Motor
+                - generic [ref=e163]: "SKU: 135SP254H"
+              - paragraph [ref=e164]: Correia Dentada
+            - paragraph [ref=e166]: R$ 145,00
+          - generic [ref=e167]:
+            - img [ref=e168]
+            - text: "Marca:"
+            - generic [ref=e171]: Dayco
+          - generic [ref=e172]:
+            - img [ref=e173]
+            - text: "Aplicação:"
+            - generic [ref=e176]: VW Motor EA111
+          - generic [ref=e177]:
+            - generic [ref=e179]:
+              - img [ref=e180]
+              - text: Baixo (3)
+            - generic [ref=e182]:
+              - button "-" [ref=e183] [cursor=pointer]
+              - generic [ref=e184]: "3"
+              - button "+" [ref=e185] [cursor=pointer]
+              - button [ref=e186] [cursor=pointer]:
+                - img [ref=e187]
+        - generic [ref=e191]:
+          - generic [ref=e192]:
+            - generic [ref=e193]:
+              - generic [ref=e194]:
+                - generic [ref=e195]: Filtros
+                - generic [ref=e196]: "SKU: C2998"
+              - paragraph [ref=e197]: Filtro de Ar
+            - paragraph [ref=e199]: R$ 65,00
+          - generic [ref=e200]:
+            - img [ref=e201]
+            - text: "Marca:"
+            - generic [ref=e204]: Mann
+          - generic [ref=e205]:
+            - img [ref=e206]
+            - text: "Aplicação:"
+            - generic [ref=e209]: Honda Civic 17+
+          - generic [ref=e210]:
+            - generic [ref=e212]:
+              - img [ref=e213]
+              - text: Baixo (4)
+            - generic [ref=e215]:
+              - button "-" [ref=e216] [cursor=pointer]
+              - generic [ref=e217]: "4"
+              - button "+" [ref=e218] [cursor=pointer]
+              - button [ref=e219] [cursor=pointer]:
+                - img [ref=e220]
+        - generic [ref=e224]:
+          - generic [ref=e225]:
+            - generic [ref=e226]:
+              - generic [ref=e227]:
+                - generic [ref=e228]: Filtros
+                - generic [ref=e229]: "SKU: C2998"
+              - paragraph [ref=e230]: Filtro de Ar
+            - paragraph [ref=e232]: R$ 65,00
+          - generic [ref=e233]:
+            - img [ref=e234]
+            - text: "Marca:"
+            - generic [ref=e237]: Mann
+          - generic [ref=e238]:
+            - img [ref=e239]
+            - text: "Aplicação:"
+            - generic [ref=e242]: Honda Civic 17+
+          - generic [ref=e243]:
+            - generic [ref=e245]:
+              - img [ref=e246]
+              - text: Baixo (4)
+            - generic [ref=e248]:
+              - button "-" [ref=e249] [cursor=pointer]
+              - generic [ref=e250]: "4"
+              - button "+" [ref=e251] [cursor=pointer]
+              - button [ref=e252] [cursor=pointer]:
+                - img [ref=e253]
+        - generic [ref=e257]:
+          - generic [ref=e258]:
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - generic [ref=e261]: Filtros
+                - generic [ref=e262]: "SKU: PSL55"
+              - paragraph [ref=e263]: Filtro de Óleo
+            - paragraph [ref=e265]: R$ 25,00
+          - generic [ref=e266]:
+            - img [ref=e267]
+            - text: "Marca:"
+            - generic [ref=e270]: Tecfil
+          - generic [ref=e271]:
+            - img [ref=e272]
+            - text: "Aplicação:"
+            - generic [ref=e275]: VW Motor EA111/EA211
+          - generic [ref=e276]:
+            - generic [ref=e278]:
+              - img [ref=e279]
+              - text: 15 unid.
+            - generic [ref=e282]:
+              - button "-" [ref=e283] [cursor=pointer]
+              - generic [ref=e284]: "15"
+              - button "+" [ref=e285] [cursor=pointer]
+              - button [ref=e286] [cursor=pointer]:
+                - img [ref=e287]
+        - generic [ref=e291]:
+          - generic [ref=e292]:
+            - generic [ref=e293]:
+              - generic [ref=e294]:
+                - generic [ref=e295]: Filtros
+                - generic [ref=e296]: "SKU: PSL55"
+              - paragraph [ref=e297]: Filtro de Óleo
+            - paragraph [ref=e299]: R$ 25,00
+          - generic [ref=e300]:
+            - img [ref=e301]
+            - text: "Marca:"
+            - generic [ref=e304]: Tecfil
+          - generic [ref=e305]:
+            - img [ref=e306]
+            - text: "Aplicação:"
+            - generic [ref=e309]: VW Motor EA111/EA211
+          - generic [ref=e310]:
+            - generic [ref=e312]:
+              - img [ref=e313]
+              - text: 15 unid.
+            - generic [ref=e316]:
+              - button "-" [ref=e317] [cursor=pointer]
+              - generic [ref=e318]: "15"
+              - button "+" [ref=e319] [cursor=pointer]
+              - button [ref=e320] [cursor=pointer]:
+                - img [ref=e321]
+        - generic [ref=e325]:
+          - generic [ref=e326]:
+            - generic [ref=e327]:
+              - generic [ref=e328]:
+                - generic [ref=e329]: Freios
+                - generic [ref=e330]: "SKU: PD/371"
+              - paragraph [ref=e331]: Pastilha de Freio Dianteira
+            - paragraph [ref=e333]: R$ 110,00
+          - generic [ref=e334]:
+            - img [ref=e335]
+            - text: "Marca:"
+            - generic [ref=e338]: Fras-le
+          - generic [ref=e339]:
+            - img [ref=e340]
+            - text: "Aplicação:"
+            - generic [ref=e343]: VW Gol/Voyage G5
+          - generic [ref=e344]:
+            - generic [ref=e346]:
+              - img [ref=e347]
+              - text: 6 unid.
+            - generic [ref=e350]:
+              - button "-" [ref=e351] [cursor=pointer]
+              - generic [ref=e352]: "6"
+              - button "+" [ref=e353] [cursor=pointer]
+              - button [ref=e354] [cursor=pointer]:
+                - img [ref=e355]
+        - generic [ref=e359]:
+          - generic [ref=e360]:
+            - generic [ref=e361]:
+              - generic [ref=e362]:
+                - generic [ref=e363]: Freios
+                - generic [ref=e364]: "SKU: PD/371"
+              - paragraph [ref=e365]: Pastilha de Freio Dianteira
+            - paragraph [ref=e367]: R$ 110,00
+          - generic [ref=e368]:
+            - img [ref=e369]
+            - text: "Marca:"
+            - generic [ref=e372]: Fras-le
+          - generic [ref=e373]:
+            - img [ref=e374]
+            - text: "Aplicação:"
+            - generic [ref=e377]: VW Gol/Voyage G5
+          - generic [ref=e378]:
+            - generic [ref=e380]:
+              - img [ref=e381]
+              - text: 6 unid.
+            - generic [ref=e384]:
+              - button "-" [ref=e385] [cursor=pointer]
+              - generic [ref=e386]: "6"
+              - button "+" [ref=e387] [cursor=pointer]
+              - button [ref=e388] [cursor=pointer]:
+                - img [ref=e389]
+        - generic [ref=e393]:
+          - generic [ref=e394]:
+            - generic [ref=e395]:
+              - generic [ref=e396]:
+                - generic [ref=e397]: Freios
+                - generic [ref=e398]: "SKU: N-1502"
+              - paragraph [ref=e399]: Pastilha de Freio Dianteira
+            - paragraph [ref=e401]: R$ 280,00
+          - generic [ref=e402]:
+            - img [ref=e403]
+            - text: "Marca:"
+            - generic [ref=e406]: Cobreq
+          - generic [ref=e407]:
+            - img [ref=e408]
+            - text: "Aplicação:"
+            - generic [ref=e411]: Honda Civic 17+
+          - generic [ref=e412]:
+            - generic [ref=e414]:
+              - img [ref=e415]
+              - text: Baixo (2)
+            - generic [ref=e417]:
+              - button "-" [ref=e418] [cursor=pointer]
+              - generic [ref=e419]: "2"
+              - button "+" [ref=e420] [cursor=pointer]
+              - button [ref=e421] [cursor=pointer]:
+                - img [ref=e422]
+        - generic [ref=e426]:
+          - generic [ref=e427]:
+            - generic [ref=e428]:
+              - generic [ref=e429]:
+                - generic [ref=e430]: Freios
+                - generic [ref=e431]: "SKU: N-1502"
+              - paragraph [ref=e432]: Pastilha de Freio Dianteira
+            - paragraph [ref=e434]: R$ 280,00
+          - generic [ref=e435]:
+            - img [ref=e436]
+            - text: "Marca:"
+            - generic [ref=e439]: Cobreq
+          - generic [ref=e440]:
+            - img [ref=e441]
+            - text: "Aplicação:"
+            - generic [ref=e444]: Honda Civic 17+
+          - generic [ref=e445]:
+            - generic [ref=e447]:
+              - img [ref=e448]
+              - text: Baixo (2)
+            - generic [ref=e450]:
+              - button "-" [ref=e451] [cursor=pointer]
+              - generic [ref=e452]: "2"
+              - button "+" [ref=e453] [cursor=pointer]
+              - button [ref=e454] [cursor=pointer]:
+                - img [ref=e455]
+        - generic [ref=e459]:
+          - generic [ref=e460]:
+            - generic [ref=e461]:
+              - generic [ref=e462]:
+                - generic [ref=e463]: Lubrificantes
+                - generic [ref=e464]: "SKU: CA-15W40"
+              - paragraph [ref=e465]: Óleo 15W40 Semissintético
+            - paragraph [ref=e467]: R$ 38,00
+          - generic [ref=e468]:
+            - img [ref=e469]
+            - text: "Marca:"
+            - generic [ref=e472]: Castrol
+          - generic [ref=e473]:
+            - img [ref=e474]
+            - text: "Aplicação:"
+            - generic [ref=e477]: Universal
+          - generic [ref=e478]:
+            - generic [ref=e480]:
+              - img [ref=e481]
+              - text: 8 unid.
+            - generic [ref=e484]:
+              - button "-" [ref=e485] [cursor=pointer]
+              - generic [ref=e486]: "8"
+              - button "+" [ref=e487] [cursor=pointer]
+              - button [ref=e488] [cursor=pointer]:
+                - img [ref=e489]
+        - generic [ref=e493]:
+          - generic [ref=e494]:
+            - generic [ref=e495]:
+              - generic [ref=e496]:
+                - generic [ref=e497]: Lubrificantes
+                - generic [ref=e498]: "SKU: CA-15W40"
+              - paragraph [ref=e499]: Óleo 15W40 Semissintético
+            - paragraph [ref=e501]: R$ 38,00
+          - generic [ref=e502]:
+            - img [ref=e503]
+            - text: "Marca:"
+            - generic [ref=e506]: Castrol
+          - generic [ref=e507]:
+            - img [ref=e508]
+            - text: "Aplicação:"
+            - generic [ref=e511]: Universal
+          - generic [ref=e512]:
+            - generic [ref=e514]:
+              - img [ref=e515]
+              - text: 8 unid.
+            - generic [ref=e518]:
+              - button "-" [ref=e519] [cursor=pointer]
+              - generic [ref=e520]: "8"
+              - button "+" [ref=e521] [cursor=pointer]
+              - button [ref=e522] [cursor=pointer]:
+                - img [ref=e523]
+        - generic [ref=e527]:
+          - generic [ref=e528]:
+            - generic [ref=e529]:
+              - generic [ref=e530]:
+                - generic [ref=e531]: Lubrificantes
+                - generic [ref=e532]: "SKU: MO-5W30"
+              - paragraph [ref=e533]: Óleo 5W30 Sintético
+            - paragraph [ref=e535]: R$ 45,00
+          - generic [ref=e536]:
+            - img [ref=e537]
+            - text: "Marca:"
+            - generic [ref=e540]: Mobil
+          - generic [ref=e541]:
+            - img [ref=e542]
+            - text: "Aplicação:"
+            - generic [ref=e545]: Universal
+          - generic [ref=e546]:
+            - generic [ref=e548]:
+              - img [ref=e549]
+              - text: 12 unid.
+            - generic [ref=e552]:
+              - button "-" [ref=e553] [cursor=pointer]
+              - generic [ref=e554]: "12"
+              - button "+" [ref=e555] [cursor=pointer]
+              - button [ref=e556] [cursor=pointer]:
+                - img [ref=e557]
+        - generic [ref=e561]:
+          - generic [ref=e562]:
+            - generic [ref=e563]:
+              - generic [ref=e564]:
+                - generic [ref=e565]: Lubrificantes
+                - generic [ref=e566]: "SKU: MO-5W30"
+              - paragraph [ref=e567]: Óleo 5W30 Sintético
+            - paragraph [ref=e569]: R$ 45,00
+          - generic [ref=e570]:
+            - img [ref=e571]
+            - text: "Marca:"
+            - generic [ref=e574]: Mobil
+          - generic [ref=e575]:
+            - img [ref=e576]
+            - text: "Aplicação:"
+            - generic [ref=e579]: Universal
+          - generic [ref=e580]:
+            - generic [ref=e582]:
+              - img [ref=e583]
+              - text: 12 unid.
+            - generic [ref=e586]:
+              - button "-" [ref=e587] [cursor=pointer]
+              - generic [ref=e588]: "12"
+              - button "+" [ref=e589] [cursor=pointer]
+              - button [ref=e590] [cursor=pointer]:
+                - img [ref=e591]
+  - navigation [ref=e31]:
+    - link "Início" [ref=e32] [cursor=pointer]:
+      - /url: /
+      - img [ref=e33]
+      - generic [ref=e36]: Início
+    - link "Recibos (OS)" [ref=e37] [cursor=pointer]:
+      - /url: /recibos
+      - img [ref=e38]
+      - generic [ref=e40]: Recibos (OS)
+    - link "Estoque" [ref=e41] [cursor=pointer]:
+      - /url: /estoque
+      - img [ref=e42]
+      - generic [ref=e46]: Estoque
+    - link "Equipe" [ref=e47] [cursor=pointer]:
+      - /url: /equipe
+      - img [ref=e48]
+      - generic [ref=e53]: Equipe

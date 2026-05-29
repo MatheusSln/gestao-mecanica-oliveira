@@ -1,0 +1,36 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "Gestão Mecânica Oliveira" [level=1] [ref=e5]
+  - main [ref=e6]:
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - heading "Resumo da Semana" [level=2] [ref=e9]
+        - generic [ref=e10]:
+          - button "Esta semana" [ref=e11] [cursor=pointer]
+          - button "Semana passada" [ref=e12] [cursor=pointer]
+      - paragraph [ref=e13]: 25/05 a 31/05
+      - img [ref=e15]
+      - generic [ref=e17]:
+        - heading "Últimas OS" [level=2] [ref=e18]
+        - link "Nova OS" [ref=e19] [cursor=pointer]:
+          - /url: /recibos/nova
+          - button "Nova OS" [ref=e20]:
+            - img [ref=e21]
+            - text: Nova OS
+  - navigation [ref=e22]:
+    - link "Início" [ref=e23] [cursor=pointer]:
+      - /url: /
+      - img [ref=e24]
+      - generic [ref=e27]: Início
+    - link "Recibos (OS)" [ref=e28] [cursor=pointer]:
+      - /url: /recibos
+      - img [ref=e29]
+      - generic [ref=e31]: Recibos (OS)
+    - link "Estoque" [ref=e32] [cursor=pointer]:
+      - /url: /estoque
+      - img [ref=e33]
+      - generic [ref=e37]: Estoque
+    - link "Equipe" [ref=e38] [cursor=pointer]:
+      - /url: /equipe
+      - img [ref=e39]
+      - generic [ref=e44]: Equipe

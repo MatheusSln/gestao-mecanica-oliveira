@@ -6,6 +6,7 @@ import { useEstoque } from '../lib/useEstoque';
 import { useEquipe } from '../lib/useEquipe';
 import { useOrdensServico } from '../lib/useOrdensServico';
 import type { PecaOS } from '../lib/types';
+import { calcComissao } from '../lib/comissao';
 import { ArrowLeft, Save, Plus, Trash2, Search, FileSignature, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -41,7 +42,7 @@ export function NovaOS() {
     setPecasUsadas((prev) => {
       const exists = prev.find((p) => p.id === pecaId);
       if (exists) return prev.map((p) => p.id === pecaId ? { ...p, qtd: p.qtd + 1 } : p);
-      return [...prev, { id: pecaId, peca: { nome: pecaDb.nome, precoVenda: pecaDb.precoVenda, qtd: 1, codigo: pecaDb.codigo }, qtd: 1 }];
+      return [...prev, { id: pecaId, peca: { nome: pecaDb.nome, precoVenda: pecaDb.precoVenda, qtd: 1, codigo: pecaDb.codigo, precoCompra: pecaDb.precoCompra }, qtd: 1 }];
     });
   };
 
@@ -67,11 +68,18 @@ export function NovaOS() {
     setErro('');
     setSalvando(true);
     try {
-      const pecasOS: PecaOS[] = pecasUsadas.map((item) => ({
-        nome: item.peca.nome,
-        qtd: item.qtd,
-        precoVenda: item.peca.precoVenda,
-      }));
+      const pecasOS: PecaOS[] = pecasUsadas.map((item) => {
+        const linha: PecaOS = {
+          nome: item.peca.nome,
+          qtd: item.qtd,
+          precoVenda: item.peca.precoVenda,
+        };
+        if (!item.id.startsWith('avulsa-')) {
+          linha.pecaId = item.id;
+          if (item.peca.precoCompra != null) linha.precoCompra = item.peca.precoCompra;
+        }
+        return linha;
+      });
 
       const id = await addOS({
         carro: carro.trim(),
@@ -85,6 +93,7 @@ export function NovaOS() {
         valor: totalOS,
         status: 'Em Aberto',
         data: hoje,
+        comissao: calcComissao(mecanicoSelecionado, totalMaoObra),
       });
 
       if (navegar) {
