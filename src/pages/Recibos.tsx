@@ -3,7 +3,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { useOrdensServico } from '../lib/useOrdensServico';
-import { Plus, Search, Printer, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Search, Printer, Loader2, Trash2, Pencil } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export function Recibos() {
@@ -43,38 +43,44 @@ export function Recibos() {
           </div>
         )}
 
-        {filtered.map((os) => (
-          <Card key={os.id} className="hover:border-primary transition-colors">
-            <CardContent className="p-4 flex flex-col gap-3">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-bold">{os.carro}</p>
-                  <p className="text-sm text-muted-foreground">{os.cliente} • Placa: {os.placa || '—'}</p>
-                </div>
-                <span className={`text-[10px] px-2 py-1 rounded-full ${os.status === 'Fechada' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                  {os.status}
-                </span>
-              </div>
+        {filtered.map((os) => {
+          const aberta = os.status !== 'Fechada';
+          const destino = aberta ? `/recibos/${os.id}/editar` : `/recibos/${os.id}`;
+          return (
+            <Card key={os.id} className="hover:border-primary transition-colors">
+              <CardContent className="p-4 flex flex-col gap-3">
+                <Link to={destino} className="flex flex-col gap-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-bold">{os.carro}</p>
+                      <p className="text-sm text-muted-foreground">{os.cliente} • Placa: {os.placa || '—'}</p>
+                    </div>
+                    <span className={`text-[10px] px-2 py-1 rounded-full ${os.status === 'Fechada' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {os.status}
+                    </span>
+                  </div>
 
-              <div className="bg-gray-50 p-2 rounded flex justify-between items-center">
-                <span className="text-xs text-muted-foreground">Mecânico: {os.mecanico} • {os.data}</span>
-                <span className="font-bold text-primary">{fmt(os.valor)}</span>
-              </div>
-
-              <div className="flex gap-2">
-                <Link to={`/recibos/${os.id}`} className="flex-1">
-                  <Button variant="outline" className="w-full h-8 text-xs gap-2">
-                    <Printer className="w-3 h-3" /> Ver Detalhes / PDF
-                  </Button>
+                  <div className="bg-gray-50 p-2 rounded flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Mecânico: {os.mecanico} • {os.data}</span>
+                    <span className="font-bold text-primary">{fmt(os.valor)}</span>
+                  </div>
                 </Link>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
-                  onClick={() => { if (confirm(`Excluir OS de ${os.cliente}?`)) deleteOS(os.id); }}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+
+                <div className="flex gap-2">
+                  <Link to={destino} className="flex-1">
+                    <Button variant="outline" className="w-full h-8 text-xs gap-2">
+                      {aberta ? <><Pencil className="w-3 h-3" /> Editar / Fechar OS</> : <><Printer className="w-3 h-3" /> Ver Recibo / PDF</>}
+                    </Button>
+                  </Link>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
+                    onClick={() => { if (confirm(`Excluir OS de ${os.cliente}?`)) deleteOS(os.id); }}>
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

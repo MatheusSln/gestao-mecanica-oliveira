@@ -9,7 +9,6 @@ import {
   serverTimestamp,
   query,
   orderBy,
-  getDocs,
   writeBatch,
 } from 'firebase/firestore';
 import { db } from './firebase';
@@ -73,6 +72,67 @@ export async function adicionarOS(
   }
   await batch.commit();
   return osRef.id;
+}
+
+type OSData = Omit<OrdemServico, 'id' | 'criadoEm' | 'status' | 'assinatura'>;
+
+export async function atualizarOS(
+  id: string,
+  nova: OSData,
+  antiga: OrdemServico,
+  validos: { pecas: Set<string>; equipe: Set<string> }
+): Promise<void> {
+  if (!db) throw new Error('Firebase não configurado');
+  const batch = writeBatch(db);
+
+  batch.update(doc(db, 'ordensServico', id), {
+    carro: nova.carro,
+    placa: nova.placa,
+    cliente: nova.cliente,
+    telefone: nova.telefone,
+    mecanico: nova.mecanico,
+    mecanicoId: nova.mecanicoId,
+    pecas: nova.pecas,
+    maoObra: nova.maoObra,
+    valor: nova.valor,
+    data: nova.data,
+    comissao: nova.comissao ?? 0,
+  });
+
+  // Reconcilia estoque: devolve as peças antigas e baixa as novas (delta líquido).
+  // Só toca em peças que ainda existem (evita falhar o batch por doc removido).
+  const deltas = new Map<string, number>();
+  for (const p of antiga.pecas) if (p.pecaId) deltas.set(p.pecaId, (deltas.get(p.pecaId) ?? 0) + p.qtd);
+  for (const p of nova.pecas) if (p.pecaId) deltas.set(p.pecaId, (deltas.get(p.pecaId) ?? 0) - p.qtd);
+  for (const [pecaId, delta] of deltas) {
+    if (delta !== 0 && validos.pecas.has(pecaId)) {
+      batch.update(doc(db, 'estoque', pecaId), { quantidade: increment(delta) });
+    }
+  }
+
+  // Reconcilia comissão / contador de carros (só mecânicos que ainda existem)
+  const antComissao = antiga.comissao ?? 0;
+  const novaComissao = nova.comissao ?? 0;
+  if (antiga.mecanicoId === nova.mecanicoId) {
+    if (nova.mecanicoId && validos.equipe.has(nova.mecanicoId) && novaComissao !== antComissao) {
+      batch.update(doc(db, 'equipe', nova.mecanicoId), { comissaoSemana: increment(novaComissao - antComissao) });
+    }
+  } else {
+    if (antiga.mecanicoId && validos.equipe.has(antiga.mecanicoId)) {
+      batch.update(doc(db, 'equipe', antiga.mecanicoId), {
+        comissaoSemana: increment(-antComissao),
+        carrosAtendidos: increment(-1),
+      });
+    }
+    if (nova.mecanicoId && validos.equipe.has(nova.mecanicoId)) {
+      batch.update(doc(db, 'equipe', nova.mecanicoId), {
+        comissaoSemana: increment(novaComissao),
+        carrosAtendidos: increment(1),
+      });
+    }
+  }
+
+  await batch.commit();
 }
 
 export async function fecharOS(id: string, assinatura?: string): Promise<void> {
@@ -144,97 +204,4 @@ export async function zerarComissaoMecanico(id: string): Promise<void> {
 export async function excluirMecanico(id: string): Promise<void> {
   if (!db) throw new Error('Firebase não configurado');
   await deleteDoc(doc(db, 'equipe', id));
-}
-
-// ─── SEED ────────────────────────────────────────────────────────────────────
-
-let seedRun: Promise<void> | null = null;
-
-export function initializeDataIfEmpty(): Promise<void> {
-  if (!db) return Promise.resolve();
-  // Idempotente: StrictMode (dev) dispara o efeito 2x; sem isto o seed grava duplicado.
-  if (!seedRun) seedRun = _initializeDataIfEmpty();
-  return seedRun;
-}
-
-async function _initializeDataIfEmpty(): Promise<void> {
-  if (!db) return;
-
-  const [estoqueSnap, osSnap, equipeSnap] = await Promise.all([
-    getDocs(collection(db, 'estoque')),
-    getDocs(collection(db, 'ordensServico')),
-    getDocs(collection(db, 'equipe')),
-  ]);
-
-  const batch = writeBatch(db);
-  let hasData = false;
-
-  if (estoqueSnap.empty) {
-    hasData = true;
-    const pecasSeed: Omit<Peca, 'id'>[] = [
-      { nome: 'Óleo 5W30 Sintético', marca: 'Mobil', codigo: 'MO-5W30', categoria: 'Lubrificantes', compatibilidade: 'Universal', quantidade: 12, precoVenda: 45.00 },
-      { nome: 'Óleo 15W40 Semissintético', marca: 'Castrol', codigo: 'CA-15W40', categoria: 'Lubrificantes', compatibilidade: 'Universal', quantidade: 8, precoVenda: 38.00 },
-      { nome: 'Filtro de Óleo', marca: 'Tecfil', codigo: 'PSL55', categoria: 'Filtros', compatibilidade: 'VW Motor EA111/EA211', quantidade: 15, precoVenda: 25.00 },
-      { nome: 'Filtro de Ar', marca: 'Mann', codigo: 'C2998', categoria: 'Filtros', compatibilidade: 'Honda Civic 17+', quantidade: 4, precoVenda: 65.00 },
-      { nome: 'Pastilha de Freio Dianteira', marca: 'Cobreq', codigo: 'N-1502', categoria: 'Freios', compatibilidade: 'Honda Civic 17+', quantidade: 2, precoVenda: 280.00 },
-      { nome: 'Pastilha de Freio Dianteira', marca: 'Fras-le', codigo: 'PD/371', categoria: 'Freios', compatibilidade: 'VW Gol/Voyage G5', quantidade: 6, precoVenda: 110.00 },
-      { nome: 'Correia Dentada', marca: 'Dayco', codigo: '135SP254H', categoria: 'Motor', compatibilidade: 'VW Motor EA111', quantidade: 3, precoVenda: 145.00 },
-      { nome: 'Amortecedor Dianteiro', marca: 'Monroe', codigo: 'SP041', categoria: 'Suspensão', compatibilidade: 'GM Onix 13-19', quantidade: 0, precoVenda: 350.00 },
-    ];
-    pecasSeed.forEach((p) => batch.set(doc(collection(db!, 'estoque')), { ...p, criadoEm: serverTimestamp() }));
-  }
-
-  // Seed equipe first to get IDs for OS
-  const mecanicoIds: Record<string, string> = {};
-  if (equipeSnap.empty) {
-    hasData = true;
-    const mecanicos = [
-      { nome: 'Marcos (Mecânico Sênior)', comissaoSemana: 850.00, carrosAtendidos: 4, comissaoTipo: 'percentual', comissaoValor: 40 },
-      { nome: 'Pedro (Auxiliar)', comissaoSemana: 400.00, carrosAtendidos: 2, comissaoTipo: 'percentual', comissaoValor: 25 },
-    ];
-    mecanicos.forEach((m) => {
-      const ref = doc(collection(db!, 'equipe'));
-      mecanicoIds[m.nome] = ref.id;
-      batch.set(ref, { ...m, criadoEm: serverTimestamp() });
-    });
-  }
-
-  if (osSnap.empty) {
-    hasData = true;
-    const marcosId = mecanicoIds['Marcos (Mecânico Sênior)'] ?? 'local';
-    const pedroId = mecanicoIds['Pedro (Auxiliar)'] ?? 'local';
-
-    const osSeed: Omit<OrdemServico, 'id'>[] = [
-      {
-        carro: 'Gol G5 1.0', placa: 'ABC-1234', cliente: 'João Silva', telefone: '(31) 98888-1111',
-        mecanico: 'Marcos (Mecânico Sênior)', mecanicoId: marcosId,
-        pecas: [
-          { nome: 'Óleo 5W30 Sintético', qtd: 4, precoVenda: 45.00 },
-          { nome: 'Filtro de Ar', qtd: 1, precoVenda: 35.00 },
-        ] as PecaOS[],
-        maoObra: 515.00, valor: 850.00, status: 'Fechada', data: '24/04/2026',
-        criadoEm: serverTimestamp(),
-      },
-      {
-        carro: 'Civic 2018 2.0', placa: 'XYZ-9876', cliente: 'Maria Souza', telefone: '(31) 97777-2222',
-        mecanico: 'Pedro (Auxiliar)', mecanicoId: pedroId,
-        pecas: [
-          { nome: 'Pastilha de Freio Dianteira', qtd: 1, precoVenda: 280.00 },
-          { nome: 'Correia Dentada', qtd: 2, precoVenda: 180.00 },
-        ] as PecaOS[],
-        maoObra: 560.00, valor: 1200.00, status: 'Fechada', data: '25/04/2026',
-        criadoEm: serverTimestamp(),
-      },
-      {
-        carro: 'Hilux 2.8 Diesel', placa: 'HIL-0001', cliente: 'Carlos', telefone: '(31) 96666-3333',
-        mecanico: 'Marcos (Mecânico Sênior)', mecanicoId: marcosId,
-        pecas: [] as PecaOS[],
-        maoObra: 450.00, valor: 450.00, status: 'Em Aberto', data: '27/04/2026',
-        criadoEm: serverTimestamp(),
-      },
-    ];
-    osSeed.forEach((os) => batch.set(doc(collection(db!, 'ordensServico')), os));
-  }
-
-  if (hasData) await batch.commit();
 }

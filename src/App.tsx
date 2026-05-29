@@ -17,6 +17,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="recibos" element={<Recibos />} />
             <Route path="recibos/nova" element={<NovaOS />} />
+            <Route path="recibos/:id/editar" element={<NovaOS />} />
             <Route path="recibos/:id" element={<DetalhesOS />} />
             <Route path="estoque" element={<Estoque />} />
             <Route path="equipe" element={<Equipe />} />

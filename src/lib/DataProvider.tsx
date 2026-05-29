@@ -3,11 +3,10 @@ import type { Peca, OrdemServico, Mecanico, ComissaoTipo } from './types';
 import { isFirebaseConfigured } from './firebase';
 import {
   subscribeToEstoque, adicionarPeca, atualizarQuantidade, removerPeca,
-  subscribeToOrdensServico, adicionarOS, fecharOS, reabrirOS, excluirOS,
+  subscribeToOrdensServico, adicionarOS, atualizarOS, fecharOS, reabrirOS, excluirOS,
   subscribeToEquipe, adicionarMecanico, zerarComissaoMecanico, excluirMecanico,
-  atualizarComissaoMecanico, initializeDataIfEmpty,
+  atualizarComissaoMecanico,
 } from './firestoreService';
-import { useMockData } from './mockData';
 
 interface DataContextValue {
   pecas: Peca[];
@@ -19,6 +18,7 @@ interface DataContextValue {
   updateQty: (id: string, delta: number) => Promise<void>;
   removePeca: (id: string) => Promise<void>;
   addOS: (os: Omit<OrdemServico, 'id' | 'criadoEm'>) => Promise<string>;
+  updateOS: (id: string, nova: Omit<OrdemServico, 'id' | 'criadoEm' | 'status' | 'assinatura'>) => Promise<void>;
   closeOS: (id: string, assinatura?: string) => Promise<void>;
   reopenOS: (id: string) => Promise<void>;
   deleteOS: (id: string) => Promise<void>;
@@ -54,7 +54,6 @@ function novoId(): string {
 }
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const { getEstoque, getEquipe, getOrdensServico } = useMockData();
   const usingFirebase = isFirebaseConfigured();
   const [pecas, setPecas] = useState<Peca[]>([]);
   const [ordens, setOrdens] = useState<OrdemServico[]>([]);
@@ -63,7 +62,6 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (usingFirebase) {
-      initializeDataIfEmpty().catch(console.error);
       const arrived = { e: false, o: false, q: false };
       const done = () => { if (arrived.e && arrived.o && arrived.q) setLoading(false); };
       const u1 = subscribeToEstoque((d) => { setPecas(d); arrived.e = true; done(); });
@@ -71,9 +69,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const u3 = subscribeToEquipe((d) => { setEquipe(d); arrived.q = true; done(); });
       return () => { u1(); u2(); u3(); };
     }
-    setPecas(loadLS(LS.estoque, getEstoque() as Peca[]));
-    setOrdens(loadLS(LS.ordens, getOrdensServico() as OrdemServico[]));
-    setEquipe(loadLS(LS.equipe, getEquipe() as Mecanico[]));
+    setPecas(loadLS(LS.estoque, []));
+    setOrdens(loadLS(LS.ordens, []));
+    setEquipe(loadLS(LS.equipe, []));
     setLoading(false);
   }, []);
 
@@ -139,6 +137,66 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       return next;
     });
     return id;
+  };
+
+  const updateOS = async (
+    id: string,
+    nova: Omit<OrdemServico, 'id' | 'criadoEm' | 'status' | 'assinatura'>
+  ): Promise<void> => {
+    const antiga = ordens.find((o) => o.id === id);
+    if (!antiga) return;
+    if (usingFirebase) {
+      await atualizarOS(id, nova, antiga, {
+        pecas: new Set(pecas.map((p) => p.id)),
+        equipe: new Set(equipe.map((m) => m.id)),
+      });
+      return;
+    }
+
+    setOrdens((prev) => {
+      const next = prev.map((o) => (o.id === id ? { ...o, ...nova } : o));
+      saveLS(LS.ordens, next);
+      return next;
+    });
+
+    // Reconcilia estoque (delta líquido: devolve antigas, baixa novas)
+    const deltas = new Map<string, number>();
+    for (const p of antiga.pecas) if (p.pecaId) deltas.set(p.pecaId, (deltas.get(p.pecaId) ?? 0) + p.qtd);
+    for (const p of nova.pecas) if (p.pecaId) deltas.set(p.pecaId, (deltas.get(p.pecaId) ?? 0) - p.qtd);
+    setPecas((prev) => {
+      const next = prev.map((p) => {
+        const delta = deltas.get(p.id) ?? 0;
+        return delta ? { ...p, quantidade: Math.max(0, p.quantidade + delta) } : p;
+      });
+      saveLS(LS.estoque, next);
+      return next;
+    });
+
+    // Reconcilia comissão / carros
+    const antComissao = antiga.comissao ?? 0;
+    const novaComissao = nova.comissao ?? 0;
+    setEquipe((prev) => {
+      let next = prev;
+      if (antiga.mecanicoId === nova.mecanicoId) {
+        if (nova.mecanicoId && novaComissao !== antComissao) {
+          next = prev.map((m) =>
+            m.id === nova.mecanicoId ? { ...m, comissaoSemana: m.comissaoSemana + (novaComissao - antComissao) } : m
+          );
+        }
+      } else {
+        next = prev.map((m) => {
+          if (m.id === antiga.mecanicoId) {
+            return { ...m, comissaoSemana: m.comissaoSemana - antComissao, carrosAtendidos: Math.max(0, m.carrosAtendidos - 1) };
+          }
+          if (m.id === nova.mecanicoId) {
+            return { ...m, comissaoSemana: m.comissaoSemana + novaComissao, carrosAtendidos: m.carrosAtendidos + 1 };
+          }
+          return m;
+        });
+      }
+      saveLS(LS.equipe, next);
+      return next;
+    });
   };
 
   const closeOS = async (id: string, assinatura?: string): Promise<void> => {
@@ -232,7 +290,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const value: DataContextValue = {
     pecas, ordens, equipe, loading, usingFirebase,
     addPeca, updateQty, removePeca,
-    addOS, closeOS, reopenOS, deleteOS,
+    addOS, updateOS, closeOS, reopenOS, deleteOS,
     addMecanico, zerarComissao, removeMecanico, updateComissao,
   };
 

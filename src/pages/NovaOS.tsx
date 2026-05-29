@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -8,13 +8,16 @@ import { useOrdensServico } from '../lib/useOrdensServico';
 import type { PecaOS } from '../lib/types';
 import { calcComissao } from '../lib/comissao';
 import { ArrowLeft, Save, Plus, Trash2, Search, FileSignature, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 export function NovaOS() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const editMode = Boolean(id);
   const { pecas } = useEstoque();
   const { equipe } = useEquipe();
-  const { addOS } = useOrdensServico();
+  const { ordens, loading, addOS, updateOS } = useOrdensServico();
+  const osEdit = id ? ordens.find((o) => o.id === id) : undefined;
 
   const [placa, setPlaca] = useState('');
   const [carro, setCarro] = useState('');
@@ -28,6 +31,36 @@ export function NovaOS() {
   const [pecaAvulsaValor, setPecaAvulsaValor] = useState('');
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState('');
+  const [carregado, setCarregado] = useState(false);
+
+  // Pré-preenche o formulário ao editar uma OS existente
+  useEffect(() => {
+    if (!editMode || !osEdit || carregado || equipe.length === 0) return;
+    setPlaca(osEdit.placa);
+    setCarro(osEdit.carro);
+    setCliente(osEdit.cliente);
+    setTelefone(osEdit.telefone);
+    // Casa pelo id; se não existir mais (mecânico removido/re-seed), tenta pelo nome
+    const mecId = equipe.some((m) => m.id === osEdit.mecanicoId)
+      ? osEdit.mecanicoId
+      : equipe.find((m) => m.nome === osEdit.mecanico)?.id ?? '';
+    setMecanicoId(mecId);
+    setValorMaoObra(osEdit.maoObra ? String(osEdit.maoObra) : '');
+    setPecasUsadas(
+      osEdit.pecas.map((p) => ({
+        id: p.pecaId ?? `avulsa-${Math.random().toString(36).slice(2, 8)}`,
+        peca: {
+          nome: p.nome,
+          precoVenda: p.precoVenda,
+          qtd: p.qtd,
+          precoCompra: p.precoCompra,
+          codigo: p.pecaId ? pecas.find((e) => e.id === p.pecaId)?.codigo : undefined,
+        },
+        qtd: p.qtd,
+      }))
+    );
+    setCarregado(true);
+  }, [editMode, osEdit, carregado, pecas, equipe]);
 
   const mecanicoSelecionado = equipe.find((m) => m.id === mecanicoId);
   const totalPecas = pecasUsadas.reduce((acc, curr) => acc + curr.peca.precoVenda * curr.qtd, 0);
@@ -81,7 +114,7 @@ export function NovaOS() {
         return linha;
       });
 
-      const id = await addOS({
+      const dados = {
         carro: carro.trim(),
         placa: placa.trim().toUpperCase(),
         cliente: cliente.trim(),
@@ -91,15 +124,16 @@ export function NovaOS() {
         pecas: pecasOS,
         maoObra: totalMaoObra,
         valor: totalOS,
-        status: 'Em Aberto',
-        data: hoje,
+        data: editMode && osEdit ? osEdit.data : hoje,
         comissao: calcComissao(mecanicoSelecionado, totalMaoObra),
-      });
+      };
 
-      if (navegar) {
+      if (editMode && id) {
+        await updateOS(id, dados);
         navigate(`/recibos/${id}`);
       } else {
-        navigate('/recibos');
+        const novoId = await addOS({ ...dados, status: 'Em Aberto' });
+        navigate(navegar ? `/recibos/${novoId}` : '/recibos');
       }
     } catch {
       setErro('Erro ao salvar a OS. Tente novamente.');
@@ -108,6 +142,22 @@ export function NovaOS() {
     }
   };
 
+  if (editMode && !carregado) {
+    const naoAchou = !osEdit && !loading;
+    return (
+      <div className="p-4 text-center mt-20">
+        {naoAchou ? (
+          <p className="text-sm text-muted-foreground">OS não encontrada.</p>
+        ) : (
+          <>
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Carregando OS...</p>
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4 pb-24 bg-gray-50 min-h-screen p-4">
       <div className="flex items-center gap-3 mb-6">
@@ -115,8 +165,8 @@ export function NovaOS() {
           <ArrowLeft className="w-5 h-5" />
         </Button>
         <div>
-          <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">Nova Ordem de Serviço</h2>
-          <p className="text-xs text-gray-500 font-medium">Preencha os dados do atendimento</p>
+          <h2 className="text-xl font-black text-gray-800 uppercase tracking-tight">{editMode ? 'Editar Ordem de Serviço' : 'Nova Ordem de Serviço'}</h2>
+          <p className="text-xs text-gray-500 font-medium">{editMode ? 'Altere os dados e salve' : 'Preencha os dados do atendimento'}</p>
         </div>
       </div>
 
@@ -251,14 +301,20 @@ export function NovaOS() {
           <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total da O.S.</span>
           <span className="text-2xl font-black text-gray-900">{fmt(totalOS)}</span>
         </div>
-        <div className="flex gap-3">
-          <Button className="flex-1 font-bold bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-50 h-12" onClick={() => salvar(false)} disabled={salvando}>
-            {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> Salvar</>}
+        {editMode ? (
+          <Button className="w-full font-bold bg-gray-900 hover:bg-gray-800 text-white h-12" onClick={() => salvar(true)} disabled={salvando}>
+            {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> Salvar alterações</>}
           </Button>
-          <Button className="flex-1 font-bold bg-gray-900 hover:bg-gray-800 text-white h-12" onClick={() => salvar(true)} disabled={salvando}>
-            {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Finalizar & PDF'}
-          </Button>
-        </div>
+        ) : (
+          <div className="flex gap-3">
+            <Button className="flex-1 font-bold bg-white text-gray-900 border-2 border-gray-900 hover:bg-gray-50 h-12" onClick={() => salvar(false)} disabled={salvando}>
+              {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Save className="w-4 h-4 mr-1" /> Salvar</>}
+            </Button>
+            <Button className="flex-1 font-bold bg-gray-900 hover:bg-gray-800 text-white h-12" onClick={() => salvar(true)} disabled={salvando}>
+              {salvando ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Finalizar & PDF'}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

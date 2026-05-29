@@ -184,7 +184,7 @@ export function Dashboard() {
 
       <div className="space-y-3">
         {ordens.slice(0, 5).map((os) => (
-          <Link to={`/recibos/${os.id}`} key={os.id} className="block">
+          <Link to={os.status === 'Fechada' ? `/recibos/${os.id}` : `/recibos/${os.id}/editar`} key={os.id} className="block">
             <Card className="hover:border-primary transition-colors">
               <CardContent className="p-4 flex justify-between items-center">
                 <div>
