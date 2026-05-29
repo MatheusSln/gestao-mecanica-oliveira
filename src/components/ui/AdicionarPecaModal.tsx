@@ -3,7 +3,7 @@ import { BarcodeScanner } from './BarcodeScanner';
 import { Button } from './button';
 import { Input } from './input';
 import { buscarProdutoPorCodigo } from '../../lib/productLookup';
-import type { Peca } from '../../lib/types';
+import type { Peca, ProductLookupResult } from '../../lib/types';
 import { X, ScanBarcode, Loader2, CheckCircle2, PackagePlus } from 'lucide-react';
 
 interface AdicionarPecaModalProps {
@@ -11,7 +11,7 @@ interface AdicionarPecaModalProps {
   onFechar: () => void;
 }
 
-type Etapa = 'escolha' | 'scanner' | 'form';
+type Etapa = 'escolha' | 'scanner' | 'selecao_produto' | 'form';
 
 const CATEGORIAS = ['Lubrificantes', 'Filtros', 'Freios', 'Motor', 'Suspensão', 'Elétrica', 'Outros'];
 
@@ -22,6 +22,7 @@ const FORM_VAZIO = {
 
 export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalProps) {
   const [etapa, setEtapa] = useState<Etapa>('escolha');
+  const [produtosEncontrados, setProdutosEncontrados] = useState<ProductLookupResult[]>([]);
   const [form, setForm] = useState(FORM_VAZIO);
   const [buscando, setBuscando] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -34,16 +35,27 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
     setEtapa('form');
     setField('codigo', codigo);
     setBuscando(true);
-    const produto = await buscarProdutoPorCodigo(codigo);
-    if (produto) {
-      setForm((prev) => ({
-        ...prev,
-        nome: produto.nome || prev.nome,
-        marca: produto.marca || prev.marca,
-        categoria: produto.categoria || prev.categoria,
-      }));
+    const produtos = await buscarProdutoPorCodigo(codigo);
+    
+    if (produtos && produtos.length > 1) {
+      setProdutosEncontrados(produtos);
+      setEtapa('selecao_produto');
+    } else if (produtos && produtos.length === 1) {
+      preencherFormularioComProduto(produtos[0]);
+      setEtapa('form');
+    } else {
+      setEtapa('form');
     }
     setBuscando(false);
+  };
+
+  const preencherFormularioComProduto = (produto: ProductLookupResult) => {
+    setForm((prev) => ({
+      ...prev,
+      nome: produto.nome || prev.nome,
+      marca: produto.marca || prev.marca,
+      categoria: produto.categoria || prev.categoria,
+    }));
   };
 
   const handleSalvar = async () => {
@@ -110,6 +122,35 @@ export function AdicionarPecaModal({ onSalvar, onFechar }: AdicionarPecaModalPro
                 <p className="text-xs text-gray-500 mt-0.5">Preencher todos os dados no formulário</p>
               </div>
             </button>
+          </div>
+        )}
+
+        {etapa === 'selecao_produto' && (
+          <div className="p-6 space-y-4">
+            <h3 className="font-bold text-gray-800 text-center">Múltiplos produtos encontrados</h3>
+            <p className="text-sm text-gray-500 text-center">Selecione o produto correspondente ao código lido:</p>
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+              {produtosEncontrados.map((prod, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    preencherFormularioComProduto(prod);
+                    setEtapa('form');
+                  }}
+                  className="w-full text-left p-3 rounded-xl border border-gray-200 hover:border-gray-400 transition-colors"
+                >
+                  <p className="font-bold text-sm text-gray-800">{prod.nome}</p>
+                  <p className="text-xs text-gray-500">{prod.marca} {prod.categoria ? `- ${prod.categoria}` : ''}</p>
+                </button>
+              ))}
+            </div>
+            <Button
+               variant="outline"
+               className="w-full mt-4 h-12"
+               onClick={() => setEtapa('form')}
+            >
+               Nenhum desses (Preencher manualmente)
+            </Button>
           </div>
         )}
 

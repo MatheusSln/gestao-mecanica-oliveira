@@ -2,27 +2,29 @@ import type { ProductLookupResult } from './types';
 
 const UPC_API = 'https://api.upcitemdb.com/prod/trial/lookup?upc=';
 
-export async function buscarProdutoPorCodigo(codigo: string): Promise<ProductLookupResult | null> {
+export async function buscarProdutoPorCodigo(codigo: string): Promise<ProductLookupResult[]> {
   try {
     const response = await fetch(`${UPC_API}${encodeURIComponent(codigo)}`, {
       headers: { Accept: 'application/json' },
     });
-    if (!response.ok) return null;
+    if (!response.ok) return [];
     const data = await response.json();
-    if (data.code !== 'OK' || !data.items?.length) return null;
-    const item = data.items[0];
-    return {
+    if (data.code !== 'OK' || !data.items?.length) return [];
+    
+    return data.items.map((item: any) => ({
       nome: item.title ?? '',
       marca: item.brand ?? '',
       categoria: mapearCategoria(item.category ?? ''),
-    };
+    }));
   } catch {
-    return null;
+    return [];
   }
 }
 
-function mapearCategoria(cat: string): string {
-  const lower = cat.toLowerCase();
+function mapearCategoria(cat: string | string[]): string {
+  if (!cat) return '';
+  const categoryStr = Array.isArray(cat) ? cat.join(' ') : String(cat);
+  const lower = categoryStr.toLowerCase();
   if (lower.includes('oil') || lower.includes('lubric')) return 'Lubrificantes';
   if (lower.includes('filter')) return 'Filtros';
   if (lower.includes('brake') || lower.includes('freio')) return 'Freios';

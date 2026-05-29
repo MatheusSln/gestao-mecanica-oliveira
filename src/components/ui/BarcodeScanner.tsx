@@ -16,25 +16,38 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
 
   useEffect(() => {
     let scanner: import('html5-qrcode').Html5Qrcode | null = null;
+    let isStarting = false;
 
     import('html5-qrcode')
       .then(({ Html5Qrcode }) => {
         if (stopped.current) return;
         scanner = new Html5Qrcode('qr-scanner-container');
         scannerRef.current = scanner;
+        isStarting = true;
         return scanner.start(
           { facingMode: 'environment' },
           { fps: 10, qrbox: { width: 260, height: 180 } },
           (decodedText) => {
             if (hasScanned.current || stopped.current) return;
             hasScanned.current = true;
-            scanner?.stop().catch(() => {}).finally(() => onScan(decodedText));
+            if (scanner && scanner.isScanning) {
+              scanner.stop().catch(() => {}).finally(() => onScan(decodedText));
+            } else {
+              onScan(decodedText);
+            }
           },
           () => {}
-        );
+        ).then(() => {
+          isStarting = false;
+          if (stopped.current && scanner && scanner.isScanning) {
+            scanner.stop().catch(() => {});
+          } else if (!stopped.current) {
+            setStatus('ativo');
+          }
+        });
       })
-      .then(() => { if (!stopped.current) setStatus('ativo'); })
       .catch((err: Error) => {
+        isStarting = false;
         if (stopped.current) return;
         const msg = err?.message ?? '';
         if (msg.includes('permission') || msg.includes('NotAllowed')) {
@@ -49,7 +62,9 @@ export function BarcodeScanner({ onScan, onCancel }: BarcodeScannerProps) {
 
     return () => {
       stopped.current = true;
-      scanner?.stop().catch(() => {});
+      if (scanner && scanner.isScanning) {
+        scanner.stop().catch(() => {});
+      }
     };
   }, []);
 
